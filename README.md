@@ -1,7 +1,7 @@
 BitBucket POST Hook Receiver
 ============================
 
-Simple nodeJS http service to listen for POST requests from BitBucket and execute `git pull` depending on the repo updated.
+Simple nodeJS http service to listen for POST requests from BitBucket and execute `git pull` (or any other command) depending on the repo updated. For more on the POST hook see the [BitBucket POST hook management page](https://confluence.atlassian.com/display/BITBUCKET/POST+hook+management).
 
 ###Config.js
 | Setting | Description |
@@ -31,3 +31,6 @@ git_pulls : {
    'database-stuff'       : 'git -C /etc/database pull'
 }
 ```
+
+###Processes.json
+This file is included to make working with [PM2](https://github.com/Unitech/pm2) immediately easy and simple. Use `pm2 start processes.json`
