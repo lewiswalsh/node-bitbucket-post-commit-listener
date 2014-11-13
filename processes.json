@@ -1,0 +1,15 @@
+{
+   "apps" : [
+      {
+         "name"        : "BitBucket POST Hook Receiver",
+         "script"      : "bitbucket_posthook_receiver.js",
+         "ignoreWatch" : ["node_modules", "public", ".git"],
+         "watch"       : true,
+         "exec_mode"   : "cluster_mode",
+         "instances"   : "max",
+         "env"         : {
+                           "NODE_ENV": "production"
+                         }
+      }
+   ]
+}
