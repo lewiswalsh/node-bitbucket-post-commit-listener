@@ -6,7 +6,7 @@
          "ignoreWatch" : ["node_modules", "public", ".git"],
          "watch"       : true,
          "exec_mode"   : "cluster_mode",
-         "instances"   : "max",
+         "instances"   : "0",
          "env"         : {
                            "NODE_ENV": "production"
                          }
