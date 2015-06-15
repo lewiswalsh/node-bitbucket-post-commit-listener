@@ -40,15 +40,18 @@
 
          // Load the POST data
          req.on('data', function(chunk){
-            post_body += chunk.toString();
+            post_body += chunk;
+            
+            // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
+            if (post_body.length > 1e6) { 
+              // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
+              req.connection.destroy();
+            }
          });
 
          // Once POST data is fully loaded
          req.on('end', function(){
-
-            var queryObj  = qs.parse(post_body);
-            var payload   = decodeURIComponent(queryObj.payload.split('+').join(' '));
-            var post_data = JSON.parse(payload);
+            var post_data  = JSON.parse(post_body);
 
                VERBOSEout('[POST body]');
                VERBOSEout(post_data);
@@ -68,20 +71,20 @@
                   if(url_parts.query.special_token === config.special_token){
                         VERBOSEout('Token check PASSED');
                         VERBOSEout('repo to pull: '+ post_data.repository.name);
-                        VERBOSEout('repo slug: '+ post_data.repository.slug);
+                        VERBOSEout('repo full_name: '+ post_data.repository.full_name);
                      setOutput(200, 'repo to pull: '+ post_data.repository.name);
 
                      //* Execute command
-                     if(config.git_pulls.hasOwnProperty(post_data.repository.slug)){
-                           VERBOSEout('Repo slug in git_pulls check PASSED');
-                        exec(config.git_pulls[post_data.repository.slug], function(err, stdout, stderr){
+                     if(config.git_pulls.hasOwnProperty(post_data.repository.full_name)){
+                           VERBOSEout('Repo full_name in git_pulls check PASSED');
+                        exec(config.git_pulls[post_data.repository.full_name], function(err, stdout, stderr){
                            if(err !== null){
                               console.error('exec error: ' + err);
                               setOutput(500, 'There was an error');
                            }
                         });
                      } else {
-                           VERBOSEout('Repo slug in git_pulls check FAILED');
+                           VERBOSEout('Repo full_name in git_pulls check FAILED');
                      }
                      //*/
 
