@@ -74,20 +74,38 @@
                         VERBOSEout('repo full_name: '+ post_data.repository.full_name);
                      setOutput(200, 'repo to pull: '+ post_data.repository.name);
 
-                     //* Execute command
-                     if(config.git_pulls.hasOwnProperty(post_data.repository.full_name)){
-                           VERBOSEout('Repo full_name in git_pulls check PASSED');
-                        exec(config.git_pulls[post_data.repository.full_name], function(err, stdout, stderr){
-                           if(err !== null){
-                              console.error('exec error: ' + err);
-                              setOutput(500, 'There was an error');
-                           }
-                        });
-                     } else {
-                           VERBOSEout('Repo full_name in git_pulls check FAILED');
-                     }
-                     //*/
+                    // Check each change to see which branches were affected.
+                    var branches = [];
+                    
+                    post_data['push'].changes.forEach(function(change) {
+                      if (change.new.type == 'branch') {
+                        branches.push(change.new.name);
+                        VERBOSEout('Branch changed: '+ change.new.name);
+                      }
+                    });
+                  
+                    // Allow a branch wildcard eg teamname/reponame:*
+                    branches.push('*');
 
+                    //* Execute command on every branch that has a pull command
+                    // in config.
+                    branches.forEach(function(branch){
+                      var pullConfigID = post_data.repository.full_name + ':' + branch;
+                      if (config.git_pulls.hasOwnProperty(pullConfigID)){
+                        VERBOSEout('Repo full_name in git_pulls check FOUND for ' + pullConfigID);
+                        exec(config.git_pulls[pullConfigID], function(err, stdout, stderr){
+                            if (err !== null){
+                              console.error('exec error: ' + err + ' for ' + pullConfigID);
+                              setOutput(500, 'There was an error');
+                            }
+                        });
+                      }
+                      else {
+                        VERBOSEout('Repo full_name in git_pulls check NOT FOUND for ' + pullConfigID);
+                      }
+                      //*/
+                    });
+                    
                   } else {
                         VERBOSEout('Token check FAILED');
                      setOutput(401, 'not even close');
